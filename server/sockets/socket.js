@@ -24,23 +24,24 @@ io.on('connection', (client) => {
 
         usuarios.agregarPersona(client.id, data.nombre, data.sala)
 
-        client.broadcast.to(data.sala).emit('listaPersona', {
-            usuario: 'Administrador', 
-            lista : usuarios.getPersonasBySala(data.sala)
-        })
+        client.broadcast.to(data.sala).emit('listaPersona', usuarios.getPersonasBySala(data.sala))
+        client.broadcast.to(data.sala).emit('crearMensaje', crearMensaje('Administrador', `${data.nombre} se unió`))
 
         callback(usuarios.getPersonasBySala(data.sala));
         
     });
 
-    client.on('crearMensaje', (data) => {
+    client.on('crearMensaje', (data, callback) => {
 
         let persona = usuarios.getPersona(client.id)
 
 
-        let mensaje = crearMensaje(persona.nombre, `Dice: ${data.mensaje}`)
+        let mensaje = crearMensaje(persona.nombre, `${data.mensaje}`)
 
         client.broadcast.to(persona.sala).emit('crearMensaje', mensaje)
+        
+
+        callback(mensaje)
     })
 
     // Evento Desconexión: cuando un usuario sale de la sala de chat
@@ -50,9 +51,9 @@ io.on('connection', (client) => {
         let usuarioDesconectado = usuarios.eliminarPersona(client.id)
         //console.log(usuarioDesconectado)
 
-        client.broadcast.to(usuarioDesconectado.sala).emit('crearMensaje', crearMensaje('Admin', `${usuarioDesconectado.nombre} salió`))
+        client.broadcast.to(usuarioDesconectado.sala).emit('crearMensaje', crearMensaje('Administrador', `${usuarioDesconectado.nombre} salió`))
 
-        client.broadcast.to(usuarioDesconectado.sala).emit('listaPersona', { lista: usuarios.getPersonasBySala(usuarioDesconectado.sala)})
+        client.broadcast.to(usuarioDesconectado.sala).emit('listaPersona', usuarios.getPersonasBySala(usuarioDesconectado.sala))
 
     })
 

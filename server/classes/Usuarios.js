@@ -25,7 +25,7 @@ class Usuarios {
     }
 
     getPersonasBySala(sala) {
-        let personasbySala = this.personas.filter(persona => persona.sala == sala)
+        let personasbySala = this.personas.filter(persona => persona.sala === sala)
 
         return personasbySala;
     }
